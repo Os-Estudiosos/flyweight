@@ -1,4 +1,4 @@
 # Exemplo 1 (chat) usa apenas a biblioteca padrão.
 # Exemplo 2 (relatórios):
 plotly>=5.0
-# boto3>=1.34   # opcional: só para usar o S3Storage em produção
+boto3>=1.34   # opcional: só para usar o S3Storage em produção
