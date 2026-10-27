@@ -20,8 +20,8 @@ from pathlib import Path
 
 import plotly.graph_objects as go
 
-from assets import LocalStorage, SharedAssetStore
-from relatorios import InlineAssetTags, Report, ReportRenderer, SharedAssetTags, css_asset, plotly_asset
+from other.exemplo_relatorio.assets import LocalStorage, SharedAssetStore
+from other.exemplo_relatorio.relatorios import InlineAssetTags, Report, ReportRenderer, SharedAssetTags, css_asset, plotly_asset
 
 OUT = Path(__file__).with_name("saida")
 

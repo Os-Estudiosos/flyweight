@@ -16,7 +16,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 
-from chat import AuthorFactory, ChatHistory
+from other.exemplo_chat.chat import AuthorFactory, ChatHistory
 
 
 # ----------------------------------------------------------------------------

@@ -12,7 +12,7 @@ from typing import Protocol
 import plotly.graph_objects as go
 from plotly.offline import get_plotlyjs, get_plotlyjs_version
 
-from assets import Asset, SharedAssetStore
+from other.exemplo_relatorio.assets import Asset, SharedAssetStore
 
 CSS_FILE = Path(__file__).with_name("relatorio.css")
 
