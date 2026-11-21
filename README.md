@@ -104,14 +104,73 @@ Dica: aumente `--arvores` (por exemplo, 20000 ou 50000) para deixar a diferença
 evidente. Na versão sem Flyweight cada árvore custa ~35 KB, então 50.000 árvores pedem
 cerca de 1,7 GB de RAM.
 
+## A refatoração preservou o comportamento
+
+`comparar-versoes` monta as duas florestas e confere que elas plantam as mesmas árvores
+(posição e espécie, na mesma ordem) e desenham a mesma imagem, pixel a pixel, com a câmera
+em 9 pontos do mundo. Não abre janela.
+
+```bash
+uv run comparar-versoes
+```
+
+```
+=== Comparando as duas versões (10.000 árvores, seed 42) ===
+Mesmas árvores (posição e espécie), na mesma ordem: 10.000 de 10.000
+Mesma imagem, pixel a pixel, em 9 posições da câmera: 9 de 9 (1.822 árvores desenhadas)
+Resultado: comportamento preservado
+```
+
+---
+
+# Toy problem: editor de texto com glifos compartilhados
+
+Exemplo pequeno, separado do jogo, usado para ensinar o padrão. Só usa a biblioteca padrão.
+
+Um documento tem milhares de caracteres, mas poucas dezenas de glifos diferentes. O desenho
+(bitmap) de um glifo é pesado e igual em todas as ocorrências do mesmo símbolo, fonte e
+tamanho; já a posição e a cor mudam a cada ocorrência.
+
+| Papel | Classe (`editor_com_flyweight.py`) | O que guarda ou faz |
+|---|---|---|
+| Flyweight | `Glifo` | símbolo, fonte, tamanho e desenho (estado intrínseco, imutável) |
+| Fábrica | `FabricaDeGlifos` | devolve o `Glifo` existente ou cria um novo |
+| Contexto | `Caractere` | linha, coluna e cor (estado extrínseco) + referência ao `Glifo` |
+| Cliente | `Documento` | calcula a posição de cada caractere e pede o glifo à fábrica |
+
+```
+toy_problem/
+├── rasterizador.py           # desenho (bitmap) simulado de um glifo, usado pelas duas versões
+├── editor_sem_flyweight.py   # cada Caractere guarda o próprio desenho
+├── editor_com_flyweight.py   # Glifo, FabricaDeGlifos, Caractere e Documento
+└── demo.py                   # compara as duas versões e mostra quais caracteres compartilham glifos
+```
+
+```bash
+uv run python toy_problem/demo.py         # 20.000 caracteres
+uv run python toy_problem/demo.py 50      # documento pequeno: o ganho praticamente some
+```
+
+(Também roda com `python3 toy_problem/demo.py`, em qualquer Python 3.10+.)
+
+Saída de referência:
+
+```
+                                  SEM Flyweight   COM Flyweight
+Caracteres no documento                  20.000          20.000
+Desenhos (bitmaps) na memória            20.000              43
+Memória dos desenhos                    47,8 MB          0,1 MB
+Memória total do documento              50,2 MB          1,5 MB
+```
+
 ---
 
 # Exemplos de Flyweight em Python
 
-Requer **Python 3.11+**.
+Requer **Python 3.11+**. Os comandos abaixo devem ser rodados na raiz do repositório.
 
 ```
-exemplos/
+other/
 ├── exemplo_chat/
 │   ├── chat.py               # Author (flyweight), AuthorFactory, Message (contexto), ChatHistory (cliente)
 │   └── demo_chat.py          # compara memória SEM x COM Flyweight
@@ -130,8 +189,7 @@ viram um único objeto `Author` compartilhado, e cada `Message` guarda só texto
 e a referência para o autor.
 
 ```bash
-cd exemplo_chat
-python demo_chat.py            # ou: python demo_chat.py 100000 50
+uv run python -m other.exemplo_chat.demo_chat              # ou: ... demo_chat 100000 50
 ```
 
 Saída de referência:
@@ -149,9 +207,8 @@ publicada uma vez em um storage, com o hash do conteúdo no nome (imutável e co
 eterno), e cada HTML guarda apenas a URL.
 
 ```bash
-pip install -r requirements.txt
-cd exemplo_relatorio
-python demo_relatorios.py      # gera ./saida/antes, ./saida/depois e ./saida/storage
+# gera other/exemplo_relatorio/saida/{antes,depois,storage}
+uv run --with plotly python -m other.exemplo_relatorio.demo_relatorios
 ```
 
 Saída de referência (40 relatórios):
@@ -167,7 +224,7 @@ Para ver o relatório funcionando, sirva a pasta de saída e abra no navegador
 (abrir o arquivo direto também funciona, porque a URL é relativa):
 
 ```bash
-python -m http.server 8000 --directory saida
+python -m http.server 8000 --directory other/exemplo_relatorio/saida
 ```
 
 Depois acesse http://localhost:8000/depois/loja_01.html.
