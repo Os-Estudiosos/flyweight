@@ -123,48 +123,6 @@ Resultado: comportamento preservado
 
 ---
 
-# Toy problem: editor de texto com glifos compartilhados
-
-Exemplo pequeno, separado do jogo, usado para ensinar o padrão. Só usa a biblioteca padrão.
-
-Um documento tem milhares de caracteres, mas poucas dezenas de glifos diferentes. O desenho
-(bitmap) de um glifo é pesado e igual em todas as ocorrências do mesmo símbolo, fonte e
-tamanho; já a posição e a cor mudam a cada ocorrência.
-
-| Papel | Classe (`editor_com_flyweight.py`) | O que guarda ou faz |
-|---|---|---|
-| Flyweight | `Glifo` | símbolo, fonte, tamanho e desenho (estado intrínseco, imutável) |
-| Fábrica | `FabricaDeGlifos` | devolve o `Glifo` existente ou cria um novo |
-| Contexto | `Caractere` | linha, coluna e cor (estado extrínseco) + referência ao `Glifo` |
-| Cliente | `Documento` | calcula a posição de cada caractere e pede o glifo à fábrica |
-
-```
-toy_problem/
-├── rasterizador.py           # desenho (bitmap) simulado de um glifo, usado pelas duas versões
-├── editor_sem_flyweight.py   # cada Caractere guarda o próprio desenho
-├── editor_com_flyweight.py   # Glifo, FabricaDeGlifos, Caractere e Documento
-└── demo.py                   # compara as duas versões e mostra quais caracteres compartilham glifos
-```
-
-```bash
-uv run python toy_problem/demo.py         # 20.000 caracteres
-uv run python toy_problem/demo.py 50      # documento pequeno: o ganho praticamente some
-```
-
-(Também roda com `python3 toy_problem/demo.py`, em qualquer Python 3.10+.)
-
-Saída de referência:
-
-```
-                                  SEM Flyweight   COM Flyweight
-Caracteres no documento                  20.000          20.000
-Desenhos (bitmaps) na memória            20.000              43
-Memória dos desenhos                    47,8 MB          0,1 MB
-Memória total do documento              50,2 MB          1,5 MB
-```
-
----
-
 # Exemplos de Flyweight em Python
 
 Requer **Python 3.11+**. Os comandos abaixo devem ser rodados na raiz do repositório.
