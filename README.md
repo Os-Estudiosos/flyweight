@@ -123,69 +123,29 @@ Resultado: comportamento preservado
 
 ---
 
-# Exemplos de Flyweight em Python
+# Toy problem: alunos e a ementa do curso
 
-Requer **Python 3.11+**. Os comandos abaixo devem ser rodados na raiz do repositório.
+Exemplo pequeno, separado do jogo, usado para ensinar o padrão antes da refatoração. Fica num
+arquivo só, `toy_problem.py`, e só usa a biblioteca padrão: mil alunos de dois cursos, em que
+cada aluno carregava a sua própria cópia da ementa (~300 KB) do curso.
 
-```
-other/
-├── exemplo_chat/
-│   ├── chat.py               # Author (flyweight), AuthorFactory, Message (contexto), ChatHistory (cliente)
-│   └── demo_chat.py          # compara memória SEM x COM Flyweight
-└── exemplo_relatorio/
-    ├── assets.py             # Asset (flyweight), SharedAssetStore (fábrica), LocalStorage / S3Storage
-    ├── relatorios.py         # Report (estado extrínseco), InlineAssetTags (antes), SharedAssetTags (depois)
-    ├── relatorio.css         # estilo compartilhado por todos os relatórios
-    └── demo_relatorios.py    # gera relatórios ANTES e DEPOIS e compara tamanhos
-```
-
-## Exemplo 1: renderizador de mensagens de chat
-
-Adaptação, para Python, do exemplo de https://www.patterns.dev/vanilla/flyweight-pattern/.
-50.000 mensagens escritas por 30 pessoas: os dados do autor (nome, avatar, cor, cargo)
-viram um único objeto `Author` compartilhado, e cada `Message` guarda só texto, horário
-e a referência para o autor.
+| Papel | No `toy_problem.py` |
+|---|---|
+| Flyweight | `Curso`: nome e ementa (estado intrínseco), imutável |
+| Fábrica | `CursoFactory`: cria o `Curso` só na primeira vez |
+| Contexto | `Aluno`: nome do aluno (estado extrínseco) + referência ao `Curso` |
+| Cliente | o bloco `__main__`, que pede os cursos à fábrica |
 
 ```bash
-uv run python -m other.exemplo_chat.demo_chat              # ou: ... demo_chat 100000 50
+uv run python toy_problem.py
 ```
 
-Saída de referência:
-
 ```
-                                  Sem Flyweight   Com Flyweight
-Memória ocupada pelas mensagens         27,1 MB         11,8 MB   (-57%)
-Objetos com dados de autor               50.000              30
+SEM Flyweight: 1000 ementas na memória,  300.4 MB
+COM Flyweight:    2 ementas na memória,    0.6 MB
+
+Aluno 1 cursa Engenharia
+sem[1].ementa is sem[3].ementa -> False (cópias)
+com[1].curso is com[3].curso   -> True (mesmo objeto)
+com[1].curso.nome = 'Medicina' -> FrozenInstanceError
 ```
-
-## Exemplo 2: relatórios HTML com bibliotecas JS compartilhadas
-
-Cada relatório embutia uma cópia inteira do Plotly (~4,8 MB). Agora a biblioteca é
-publicada uma vez em um storage, com o hash do conteúdo no nome (imutável e com cache
-eterno), e cada HTML guarda apenas a URL.
-
-```bash
-# gera other/exemplo_relatorio/saida/{antes,depois,storage}
-uv run --with plotly python -m other.exemplo_relatorio.demo_relatorios
-```
-
-Saída de referência (40 relatórios):
-
-```
-                              ANTES (embutido)    DEPOIS (Flyweight)
-Tamanho médio por HTML                 4,61 MB               9,34 KB
-Uploads para o storage                       -                     2   (78 reaproveitamentos)
-Rede estimada: 22,49 GB -> 1,39 GB (-94%)
-```
-
-Para ver o relatório funcionando, sirva a pasta de saída e abra no navegador
-(abrir o arquivo direto também funciona, porque a URL é relativa):
-
-```bash
-python -m http.server 8000 --directory other/exemplo_relatorio/saida
-```
-
-Depois acesse http://localhost:8000/depois/loja_01.html.
-
-Em produção, troque o `LocalStorage` por
-`S3Storage("nome-do-bucket", "https://cdn.suaempresa.com.br")` (requer `boto3`).
