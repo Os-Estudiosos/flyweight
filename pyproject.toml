@@ -15,6 +15,7 @@ dependencies = [
 [project.scripts]
 jogo-sem-flyweight = "flyweight:main_naive"
 jogo-com-flyweight = "flyweight:main_flyweight"
+comparar-versoes = "flyweight.compare:main"
 
 [build-system]
 requires = ["uv_build>=0.12.13,<0.13.0"]
